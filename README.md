@@ -56,7 +56,7 @@ Hugo Modules require a working `go` binary on your `PATH`.
 If your site does not already use Hugo Modules, initialize it once from the site root:
 
 ```bash
-hugo mod init github.com/hugomelis/your-site
+hugo mod init github.com/your-user/your-site
 ```
 
 Then add the import to your site's `hugo.toml`:
@@ -64,13 +64,13 @@ Then add the import to your site's `hugo.toml`:
 ```toml
 [module]
   [[module.imports]]
-    path = "github.com/hugomelis/hugo-experiment-activity"
+    path = "github.com/kalsdjf23/hugo-experiment-activity"
 ```
 
 If you want to fetch it immediately instead of waiting for the next Hugo build:
 
 ```bash
-hugo mod get github.com/hugomelis/hugo-experiment-activity
+hugo mod get github.com/kalsdjf23/hugo-experiment-activity
 ```
 
 ## Use In The Host Site
@@ -125,7 +125,7 @@ Then add the module import to `hugo.toml`:
 ```toml
 [module]
   [[module.imports]]
-    path = "github.com/hugomelis/hugo-experiment-activity"
+    path = "github.com/kalsdjf23/hugo-experiment-activity"
 ```
 
 Then render it where you want it, for example in a layout:

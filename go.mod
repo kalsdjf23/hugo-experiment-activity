@@ -1,3 +1,3 @@
-module github.com/hugomelis/hugo-experiment-activity
+module github.com/kalsdjf23/hugo-experiment-activity
 
 go 1.22
