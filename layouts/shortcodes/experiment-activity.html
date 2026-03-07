@@ -1,0 +1,9 @@
+{{- $section := .Get "section" | default "experiments" -}}
+{{- $days := .Get "days" | default 365 | int -}}
+{{- $title := .Get "title" | default "" -}}
+{{- partial "hugo-experiment-activity/activity.html" (dict
+  "page" .Page
+  "section" $section
+  "days" $days
+  "title" $title
+) -}}
