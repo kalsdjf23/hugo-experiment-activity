@@ -1,55 +1,21 @@
 # hugo-experiment-activity
 
-`hugo-experiment-activity` is a standalone Hugo Module that renders a GitHub-style activity overview from a section of your Hugo content. It is designed for `experiments` by default and counts published pages by their `.Date`.
+`hugo-experiment-activity` is now a compatibility wrapper around the generic open-source module [`hugo-activity-heatmap`](https://github.com/kalsdjf23/hugo-activity-heatmap).
 
-The module is self-contained:
+Use this repo if you want to keep the original experiment-specific API:
 
-- no dependency on the host site's CSS
-- no JavaScript
-- no direct filesystem coupling to the host repo
-- works with both leaf bundles and flat Markdown files
+- partial path: `hugo-experiment-activity/activity.html`
+- shortcode: `{{< experiment-activity >}}`
+- default section: `experiments`
+- default wording: `AI experiment` / `AI experiments`
+- default mode: binary
+- start marker enabled by default
 
-## What It Renders
+For new projects, prefer the generic module:
 
-- a GitHub-style activity card
-- a Monday-first week grid
-- month labels across the top
-- no weekday label column; the full width is used for the day cells
-- a binary activity state: neutral for no post, green for published
-- a clearer legend with larger swatches for `No post` and `Published`
-- a start marker that shows when the first published experiment in the section was posted
-- responsive sizing that scales to the width of its host container without horizontal scrolling
+- [`github.com/kalsdjf23/hugo-activity-heatmap`](https://github.com/kalsdjf23/hugo-activity-heatmap)
 
-By default it renders the last `365` days and generates a title like `17 AI experiments in the last year`.
-If you pass `title`, that custom text is shown instead of the auto-generated count-based heading.
-
-## Module API
-
-### Partial
-
-```go-html-template
-{{ partial "hugo-experiment-activity/activity.html" (dict "page" . "section" "experiments" "days" 365 "title" "") }}
-```
-
-### Shortcode
-
-```go-html-template
-{{< experiment-activity section="experiments" days="365" title="" >}}
-```
-
-### Options
-
-- `page`: required for the partial; pass the current page context
-- `section`: optional, defaults to `experiments`
-- `days`: optional, defaults to `365`
-- `title`: optional; when omitted, the module auto-generates headings like `17 AI experiments in the last year`; when set, it fully replaces that default heading
-
-## Install In A Hugo Site
-
-Official Hugo docs:
-
-- [Hugo Modules introduction](https://gohugo.io/hugo-modules/introduction/)
-- [Module configuration](https://gohugo.io/configuration/module/)
+## Install
 
 Hugo Modules require a working `go` binary on your `PATH`.
 
@@ -59,7 +25,7 @@ If your site does not already use Hugo Modules, initialize it once from the site
 hugo mod init github.com/your-user/your-site
 ```
 
-Then add the import to your site's `hugo.toml`:
+Then add the wrapper import to your site's `hugo.toml`:
 
 ```toml
 [module]
@@ -67,106 +33,67 @@ Then add the import to your site's `hugo.toml`:
     path = "github.com/kalsdjf23/hugo-experiment-activity"
 ```
 
-If you want to fetch it immediately instead of waiting for the next Hugo build:
+Optionally fetch it immediately:
 
 ```bash
 hugo mod get github.com/kalsdjf23/hugo-experiment-activity
 ```
 
-## Use In The Host Site
+## Use It
 
-Recommended partial call in a layout:
+Partial:
 
 ```go-html-template
 {{ partial "hugo-experiment-activity/activity.html" (dict "page" . "section" "experiments") }}
 ```
 
-Example shortcode use in Markdown:
+Shortcode:
 
 ```md
-## Activity
-
 {{< experiment-activity >}}
 ```
 
-Example shortcode with a custom heading:
+Custom title:
 
 ```md
 {{< experiment-activity title="AI experiment activity in the last year" >}}
 ```
 
-## How The Counting Works
+## Wrapper Behavior
 
-The module:
+This wrapper delegates to the generic heatmap module with fixed experiment defaults:
 
 - reads from `.Site.RegularPages`
-- filters to the requested `section`
-- excludes drafts
-- excludes expired pages
-- excludes pages outside the visible time window
-- groups posts by `page.Date.Format "2006-01-02"`
+- filters to the `experiments` section unless you override `section`
+- uses `.Date`
+- excludes drafts, expired pages, and future-dated pages
+- renders a binary active/inactive heatmap
+- auto-generates headings like `17 AI experiments in the last year`
+- uses experiment wording in cell labels, for example `1 AI experiment on Mar 4, 2026`
+- shows a `Started on ...` legend item for the earliest published experiment
 
-Any day with one or more published pages uses the same active color. The module does not use density gradients.
-Cell labels and hover text use experiment wording, for example `No experiments on Mar 4, 2026`, `1 experiment on Mar 4, 2026`, or `2 experiments on Mar 4, 2026`.
-The legend also shows the first published experiment date in the filtered section, for example `Started on Feb 18, 2026`.
+The clearer binary legend remains `No post` and `Published`.
 
-That means helper files inside page bundles such as `plan.md` or `prompt1.md` are not counted unless Hugo exposes them as regular pages.
+## Generic Module
 
-## Integrating Into The Current Main Site
+If you want a reusable component for blogs, notes, changelogs, or all regular pages, use:
 
-The current `hugomelis.nl` site at `/Users/hugo/OpenClaw/CODEX integration` is not a Hugo Module yet, so the other Codex thread should do this first in that repo:
+- [`github.com/kalsdjf23/hugo-activity-heatmap`](https://github.com/kalsdjf23/hugo-activity-heatmap)
 
-```bash
-hugo mod init github.com/hugomelis/hugomelis-site
-```
+That module adds:
 
-Then add the module import to `hugo.toml`:
-
-```toml
-[module]
-  [[module.imports]]
-    path = "github.com/kalsdjf23/hugo-experiment-activity"
-```
-
-Then render it where you want it, for example in a layout:
-
-```go-html-template
-{{ partial "hugo-experiment-activity/activity.html" (dict "page" . "section" "experiments") }}
-```
-
-No content restructure is needed. Hugo already treats the real experiment posts in `content/experiments` as regular pages and ignores helper Markdown files inside bundles for page listing.
+- `density` and `binary` modes
+- configurable `section`
+- configurable `date_field`
+- configurable nouns
+- optional start-date legend
 
 ## Local Smoke Test
 
-This repo includes `exampleSite/` wired to the local module via a `replace` directive.
+This repo includes `exampleSite/` for verifying the wrapper behavior.
 
 Build it with:
 
 ```bash
 hugo --source exampleSite --destination /tmp/hugo-experiment-activity-example --noBuildLock
-```
-
-If that command fails with a missing `go` binary, install Go or expose it on your `PATH` first, then rerun the build.
-
-The example site includes:
-
-- one flat-file experiment post
-- one bundle-based experiment post
-- two posts on the same day to verify counting text and the binary active state
-- one draft experiment that should not count
-- one future experiment that should not count
-- one expired experiment that should not count
-- an empty-state page using a missing section
-
-## Repo Layout
-
-```text
-layouts/
-  partials/hugo-experiment-activity/activity.html
-  shortcodes/experiment-activity.html
-exampleSite/
-  go.mod
-  hugo.toml
-  content/
-  layouts/
 ```
